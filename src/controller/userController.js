@@ -2,21 +2,33 @@ import User from "../models/User.js";
 
 export const createUser = async (req, res, next) => {
   try {
-    const { name, email, password, confirmPassword, level } = req.body;
+    const { name, email, password, level } = req.body;
 
-    if (password !== confirmPassword) {
-      return res
-        .status(400)
-        .json({ status: "fail", message: "Passwords do not match" });
-    }
+    const existedUser = await User.findOne({ $or: [{ name }, { email }] });
+    if (existedUser) {
+      if (existedUser.name === name && existedUser.email === email) {
+        return res.status(400).json({
+          status: "fail",
+          message: "This account already in use",
+        });
+      } else if (existedUser.name === name) {
+        return res.status(400).json({
+          status: "fail",
+          message: "This name already in use",
+        });
+      } else if (existedUser.email === email) {
+        return res.status(400).json({
+          status: "fail",
+          message: "This email already in use",
+        });
+      }
 
-    const exists = await User.exists({ email });
-    if (exists) {
       return res.status(400).json({
         status: "fail",
         message: "This account already in use",
       });
     }
+
     const newUser = new User({
       name,
       email,
