@@ -13,12 +13,12 @@ export const loginWithEmail = async (req, res, next) => {
       });
     }
 
-    const match = user && (await bcrypt.compare(password, user.password));
-
-    if (!match) {
-      return res
-        .status(400)
-        .json({ status: "fail", message: "Incorrect email or password" });
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Incorrect password. Please try again",
+      });
     }
 
     const token = await user.generateAuthToken();
