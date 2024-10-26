@@ -16,11 +16,12 @@ dotenv.config();
 
 const PORT = process.env.PORT || 5010;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-const mongoURI = process.env.LOCAL_MONGO_URI;
+const mongoURI = process.env.DB_URI;
+console.log(mongoURI);
 
 mongoose
   .connect(mongoURI)
