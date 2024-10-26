@@ -1,7 +1,12 @@
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const SALTROUNDS = 10;
+const SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 const userSchema = new mongoose.Schema(
   {
@@ -27,6 +32,17 @@ userSchema.pre("save", async function (next) {
     next();
   }
 });
+
+userSchema.methods.generateAuthToken = async function () {
+  try {
+    const token = jwt.sign({ _id: this._id }, SECRET_KEY, {
+      expiresIn: "24h",
+    });
+    return token;
+  } catch (error) {
+    throw new Error("Token generation failed");
+  }
+};
 
 userSchema.methods.toJSON = function () {
   const obj = this._doc;
