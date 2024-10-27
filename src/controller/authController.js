@@ -54,3 +54,19 @@ export const authenticate = (req, res, next) => {
     next(error);
   }
 };
+
+export const checkAdminPermission = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const user = await User.findById(userId);
+    if (user.level !== "admin") {
+      return res.status(400).json({
+        status: "fail",
+        message: "You should have admin permission",
+      });
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
