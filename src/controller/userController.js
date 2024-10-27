@@ -41,3 +41,19 @@ export const createUser = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getUser = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ status: "fail", message: "User unavailable" });
+    }
+    res.status(200).json({ status: "success", user });
+  } catch (error) {
+    next(error);
+  }
+};
