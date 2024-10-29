@@ -1,4 +1,4 @@
-import express, { json } from "express";
+import express from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -30,8 +30,9 @@ mongoose
 
 app.use((err, req, res, next) => {
   console.error("Error:", err);
+
   res.status(500).json({
     status: "error",
-    message: "Internal server error. Please try again later.",
+    message: err.message || "Internal server error. Please try again later.",
   });
 });
