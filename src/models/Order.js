@@ -2,6 +2,17 @@ import mongoose from "mongoose";
 import User from "./User.js";
 import Product from "./Product.js";
 
+const orderItemSchema = new mongoose.Schema({
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Product,
+    required: true,
+  },
+  price: { type: Number, required: true },
+  size: { type: String, required: true },
+  qty: { type: Number, required: true, default: 1 },
+});
+
 const orderSchema = new mongoose.Schema(
   {
     userId: {
@@ -18,17 +29,6 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-const orderItemSchema = new mongoose.Schema({
-  productId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: Product,
-    required: true,
-  },
-  price: { type: Number, required: true },
-  size: { type: String, required: true },
-  quantity: { type: Number, required: true, default: 1 },
-});
 
 orderSchema.methods.toJSON = function () {
   const obj = this._doc;

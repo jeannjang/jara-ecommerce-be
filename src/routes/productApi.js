@@ -4,6 +4,7 @@ import {
   getProducts,
   updateProduct,
   deleteProduct,
+  getProductDetail,
 } from "../controller/productController.js";
 import {
   authenticate,
@@ -13,7 +14,8 @@ import {
 const router = express.Router();
 
 router.post("/", authenticate, checkAdminPermission, createProduct);
-router.get("/", getProducts); //admin, customer 모두의 상품 목록 조회
+router.get("/", getProducts); //admin, customer 상품 목록 조회
+router.get("/:id", getProductDetail); //admin, customer 상품 상세 조회
 router.put("/:id", authenticate, checkAdminPermission, updateProduct);
 router.delete("/:id", authenticate, checkAdminPermission, deleteProduct);
 
