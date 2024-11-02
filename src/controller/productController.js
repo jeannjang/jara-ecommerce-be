@@ -81,6 +81,30 @@ export const getProducts = async (req, res, next) => {
   }
 };
 
+export const getProductDetail = async (req, res, next) => {
+  try {
+    const productId = req.params.id;
+    const product = await Product.findOne({
+      _id: productId,
+      isDeleted: false, // 삭제되지 않은 상품만 조회
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Sorry. Product not found.",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      product,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateProduct = async (req, res, next) => {
   try {
     const productId = req.params.id;
