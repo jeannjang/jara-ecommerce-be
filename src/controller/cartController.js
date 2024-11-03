@@ -1,4 +1,5 @@
 import Cart from "../models/Cart.js";
+import Product from "../models/Product.js";
 
 export const addItemToCart = async (req, res, next) => {
   try {
@@ -46,10 +47,28 @@ export const getCartItems = async (req, res, next) => {
   }
 };
 
+export const getCartItemCount = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const cart = await Cart.findOne({ userId });
+
+    // 카트가 없거나 아이템이 없는 경우 0 반환
+    const count = cart ? cart.items.length : 0;
+
+    res.status(200).json({
+      status: "success",
+      count,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 기존 deleteCartItem과 updateCartItemQty 함수 수정
 export const deleteCartItem = async (req, res, next) => {
   try {
     const { userId } = req;
-    const { itemId } = req.params; // URL에서 카트 아이템 ID를 받음
+    const { itemId } = req.params;
 
     const cart = await Cart.findOne({ userId });
     if (!cart) {
@@ -59,11 +78,10 @@ export const deleteCartItem = async (req, res, next) => {
       });
     }
 
-    // 해당 아이템 cart.items 배열에서 제거
     cart.items = cart.items.filter((item) => item._id.toString() !== itemId);
     await cart.save();
 
-    // updated카트 정보 반환
+    // 업데이트된 카트 정보 반환
     const updatedCart = await Cart.findOne({ userId }).populate({
       path: "items.productId",
       model: "Product",
@@ -72,6 +90,62 @@ export const deleteCartItem = async (req, res, next) => {
     res.status(200).json({
       status: "success",
       cart: updatedCart,
+      count: updatedCart.items.length, // 카트 아이템 수도 함께 반환
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateCartItemQty = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const { itemId } = req.params;
+    const { qty } = req.body;
+
+    if (!qty || qty < 1) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Invalid quantity",
+      });
+    }
+
+    const cart = await Cart.findOne({ userId });
+    if (!cart) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Cart not found",
+      });
+    }
+
+    const cartItem = cart.items.id(itemId);
+    if (!cartItem) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Cart item not found",
+      });
+    }
+
+    const product = await Product.findById(cartItem.productId);
+    if (!product || product.stock[cartItem.size] < qty) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Out of stock",
+      });
+    }
+
+    cartItem.qty = qty;
+    await cart.save();
+
+    const updatedCart = await Cart.findOne({ userId }).populate({
+      path: "items.productId",
+      model: "Product",
+    });
+
+    res.status(200).json({
+      status: "success",
+      cart: updatedCart,
+      count: updatedCart.items.length, // 카트 아이템 수도 함께 반환
     });
   } catch (error) {
     next(error);
