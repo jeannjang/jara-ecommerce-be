@@ -31,3 +31,18 @@ export const addItemToCart = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getCartItems = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items",
+      populate: { path: "productId", model: "Product" },
+    });
+
+    res.status(200).json({ status: "success", cart });
+  } catch (error) {
+    next(error);
+  }
+};
+//data: cart.items
