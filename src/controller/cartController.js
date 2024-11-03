@@ -45,4 +45,35 @@ export const getCartItems = async (req, res, next) => {
     next(error);
   }
 };
-//data: cart.items
+
+export const deleteCartItem = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const { itemId } = req.params; // URL에서 카트 아이템 ID를 받음
+
+    const cart = await Cart.findOne({ userId });
+    if (!cart) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Cart not found",
+      });
+    }
+
+    // 해당 아이템 cart.items 배열에서 제거
+    cart.items = cart.items.filter((item) => item._id.toString() !== itemId);
+    await cart.save();
+
+    // updated카트 정보 반환
+    const updatedCart = await Cart.findOne({ userId }).populate({
+      path: "items.productId",
+      model: "Product",
+    });
+
+    res.status(200).json({
+      status: "success",
+      cart: updatedCart,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
