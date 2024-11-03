@@ -64,7 +64,6 @@ export const getCartItemCount = async (req, res, next) => {
   }
 };
 
-// 기존 deleteCartItem과 updateCartItemQty 함수 수정
 export const deleteCartItem = async (req, res, next) => {
   try {
     const { userId } = req;
@@ -145,7 +144,7 @@ export const updateCartItemQty = async (req, res, next) => {
     res.status(200).json({
       status: "success",
       cart: updatedCart,
-      count: updatedCart.items.length, // 카트 아이템 수도 함께 반환
+      count: updatedCart.items.length,
     });
   } catch (error) {
     next(error);
