@@ -15,7 +15,7 @@ export const createOrder = async (req, res, next) => {
         if (!product) {
           return {
             isValid: false,
-            message: `상품 ID ${item.productId}를 찾을 수 없습니다.`,
+            message: `Unable to find some of your requested item in your cart.`,
           };
         }
 
@@ -23,7 +23,9 @@ export const createOrder = async (req, res, next) => {
         if (currentStock < item.qty) {
           return {
             isValid: false,
-            message: `${product.name}의 ${item.size} 사이즈 재고가 부족합니다. (현재 재고: ${currentStock})\n`,
+            message: `'${
+              product.name
+            }' - Size ${item.size.toUpperCase()}: Only ${currentStock} available`,
           };
         }
 
@@ -40,9 +42,11 @@ export const createOrder = async (req, res, next) => {
       (result) => !result.isValid
     );
     if (insufficientStocks.length > 0) {
-      const errorMessage = insufficientStocks
+      let errorMessage = "Some items in your cart are unavailable:\n";
+      errorMessage += insufficientStocks
         .map((result) => result.message)
-        .join("");
+        .join("\n");
+
       return res.status(400).json({
         status: "fail",
         message: errorMessage.trim(),
@@ -86,13 +90,15 @@ export const createOrder = async (req, res, next) => {
     res.status(200).json({
       status: "success",
       orderNum: newOrder.orderNum,
-      cartItemCount: 0, // 미들웨어에서 카트가 비워질 것이므로 0으로 설정
+      cartItemCount: 0, // 모델에서 미들웨어로 카트가 비워짐과 함께 0으로 설정
     });
   } catch (error) {
     console.error("Order creation error:", error);
     res.status(400).json({
       status: "fail",
-      message: error.message || "주문 처리 중 오류가 발생했습니다.",
+      message:
+        error.message ||
+        "Sorry, we couldn't process your order right now. Please try again.",
     });
   }
 };
@@ -135,7 +141,7 @@ export const getOrderList = async (req, res, next) => {
 
     const skipAmount = (page - 1) * PAGE_SIZE;
 
-    // 주문 목록 조회와 전체 개수 카운트를 병렬로 실행
+    // 주문목록 조회, 전체개수 카운트 병렬로 실행
     const [orders, totalCount] = await Promise.all([
       Order.find(searchCondition)
         .populate("userId", "-password")
@@ -152,6 +158,31 @@ export const getOrderList = async (req, res, next) => {
       status: "success",
       orders,
       totalPageNum,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const order = await Order.findByIdAndUpdate(id, { status }, { new: true })
+      .populate("userId", "-password")
+      .populate("items.productId");
+
+    if (!order) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Order not found",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      order,
     });
   } catch (error) {
     next(error);
