@@ -96,3 +96,64 @@ export const createOrder = async (req, res, next) => {
     });
   }
 };
+
+// (MyPage 사용자용)
+export const getOrder = async (req, res, next) => {
+  try {
+    const { userId } = req;
+
+    const orders = await Order.find({ userId })
+      .populate("userId", "-password") // 비밀번호 제외하고 유저 정보 가져오기
+      .populate("items.productId") // 상품 정보 가져오기
+      .sort({ createdAt: -1 }); // 최신순 정렬
+
+    if (!orders) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No orders found",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      orders,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 관리자용 전체 주문 목록 조회 (페이지네이션 포함)
+export const getOrderList = async (req, res, next) => {
+  try {
+    const PAGE_SIZE = 5;
+    const { page = 1, ordernum } = req.query;
+
+    const searchCondition = {
+      ...(ordernum ? { orderNum: { $regex: ordernum, $options: "i" } } : {}),
+    };
+
+    const skipAmount = (page - 1) * PAGE_SIZE;
+
+    // 주문 목록 조회와 전체 개수 카운트를 병렬로 실행
+    const [orders, totalCount] = await Promise.all([
+      Order.find(searchCondition)
+        .populate("userId", "-password")
+        .populate("items.productId")
+        .sort({ createdAt: -1 })
+        .skip(skipAmount)
+        .limit(PAGE_SIZE),
+      Order.countDocuments(searchCondition),
+    ]);
+
+    const totalPageNum = Math.ceil(totalCount / PAGE_SIZE);
+
+    res.status(200).json({
+      status: "success",
+      orders,
+      totalPageNum,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
