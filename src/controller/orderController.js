@@ -93,7 +93,7 @@ export const createOrder = async (req, res, next) => {
       cartItemCount: 0, // 모델에서 미들웨어로 카트가 비워짐과 함께 0으로 설정
     });
   } catch (error) {
-    console.error("Order creation error:", error);
+    console.error("Order creation error(BE):", error);
     res.status(400).json({
       status: "fail",
       message:
@@ -132,7 +132,7 @@ export const getOrder = async (req, res, next) => {
 // 관리자용 전체 주문 목록 조회 (페이지네이션 포함)
 export const getOrderList = async (req, res, next) => {
   try {
-    const PAGE_SIZE = 5;
+    const PAGE_SIZE = 3;
     const { page = 1, ordernum } = req.query;
 
     const searchCondition = {
