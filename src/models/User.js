@@ -5,31 +5,37 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const SALTROUNDS = 10;
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    level: { type: String, enum: ["admin", "customer"], default: "customer" }, // admin, customer
+    password: {
+      type: String,
+      required: function () {
+        return !this.googleId;
+      },
+    },
+    googleId: { type: String },
+    level: { type: String, enum: ["admin", "customer"], default: "customer" },
   },
   { timestamps: true }
 );
 
 userSchema.pre("save", async function (next) {
-  if (this.isModified("password") || this.isNew) {
+  // password가 없거나 password가 수정되지 않았을 때는 다음 미들웨어로 넘어감
+  if (!this.passowrd || !this.isModified("password")) {
+    return next();
+  } else {
+    // password가 있을 때만 해싱
     try {
-      const hashedPassword = await bcrypt.hash(this.password, SALTROUNDS);
-      this.password = hashedPassword;
-      console.log("Password has been hashed!", hashedPassword);
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
       next();
     } catch (error) {
       next(error);
     }
-  } else {
-    next();
   }
 });
 

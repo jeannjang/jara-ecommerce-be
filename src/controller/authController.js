@@ -2,10 +2,12 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { OAuth2Client } from "google-auth-library";
 
 dotenv.config();
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
 export const loginWithEmail = async (req, res, next) => {
   try {
@@ -52,6 +54,53 @@ export const authenticate = (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const loginWithGoogle = async (req, res, next) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({
+        status: "fail",
+        message: "No credential provided",
+      });
+    }
+
+    const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: GOOGLE_CLIENT_ID,
+    });
+
+    const { email, name, sub: googleId } = ticket.getPayload();
+
+    let user = await User.findOne({ $or: [{ email }, { googleId }] });
+
+    if (!user) {
+      user = new User({
+        email,
+        name,
+        googleId,
+      });
+      await user.save();
+    } else if (!user.googleId) {
+      //login with email
+      // 이미 이메일로 가입한 유저는 googleId 연동
+      user.googleId = googleId;
+      await user.save();
+    }
+
+    const token = await user.generateAuthToken();
+    res.status(200).json({ status: "success", user, token });
+  } catch (error) {
+    console.error("Google Login Error:", error);
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
   }
 };
 
