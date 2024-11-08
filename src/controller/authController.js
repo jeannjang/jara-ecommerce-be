@@ -87,9 +87,7 @@ export const loginWithGoogle = async (req, res, next) => {
       });
       await user.save();
     } else if (!user.googleId) {
-      //login with email
-      // 이미 이메일로 가입한 유저는 googleId 연동
-      user.googleId = googleId;
+      user.googleId = googleId; // (login with email 유저이면)이미 이메일로 가입한 유저이면 googleId 연동
       await user.save();
     }
 
