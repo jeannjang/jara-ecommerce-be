@@ -1,3 +1,4 @@
+import Order from "../models/Order.js";
 import Review from "../models/Review.js";
 
 export const createReview = async (req, res, next) => {
@@ -5,6 +6,19 @@ export const createReview = async (req, res, next) => {
     const { productId } = req.params;
     const userId = req.userId;
     const { rating, comment } = req.body;
+
+    const hasPurchased = await Order.findOne({
+      userId,
+      "items.productId": productId, // items 배열 내의 productId 확인
+      //   status: "delivered", ;개발중 주문상태 관계없이 리뷰 작성 가능
+    });
+
+    if (!hasPurchased) {
+      return res.status(403).json({
+        status: "fail",
+        message: "You can only review products you have purchased",
+      });
+    }
 
     const review = new Review({
       productId,

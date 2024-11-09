@@ -8,8 +8,8 @@ import { authenticate } from "../controller/authController.js";
 
 const router = express.Router();
 
-router.post("/create/:productId", authenticate, createReview);
-router.get("/get/:productId", getProductReviews);
-router.delete("/delete/:reviewId", authenticate, deleteReview);
+router.post("/:productId", authenticate, createReview);
+router.get("/:productId", getProductReviews);
+router.delete("/:reviewId", authenticate, deleteReview);
 
 export default router;
