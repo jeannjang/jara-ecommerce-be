@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema(
 
 userSchema.pre("save", async function (next) {
   // password가 없거나 password가 수정되지 않았을 때는 다음 미들웨어로 넘어감
-  if (!this.passowrd || !this.isModified("password")) {
+  if (!this.password || !this.isModified("password")) {
     return next();
   } else {
     // password가 있을 때만 해싱
