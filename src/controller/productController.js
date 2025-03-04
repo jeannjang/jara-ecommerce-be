@@ -45,13 +45,22 @@ export const createProduct = async (req, res, next) => {
 //url 쿼리를 통해 데이터를 가져오는 함수
 export const getProducts = async (req, res, next) => {
   try {
-    const PAGE_SIZE = 4;
-    const { page, name } = req.query;
+    const PAGE_SIZE = 12;
+    const { page, name, category } = req.query;
 
     const searchCondition = {
       isDeleted: { $ne: true }, // 삭제되지 않은 상품만 조회
-      ...(name ? { name: { $regex: name, $options: "i" } } : {}),
     };
+
+    if (name) {
+      searchCondition.name = { $regex: name, $options: "i" };
+    }
+
+    if (category) {
+      searchCondition.category = {
+        $in: [new RegExp(category, "i")],
+      };
+    }
 
     const baseQuery = Product.find(searchCondition).sort({ createdAt: -1 });
 
@@ -86,7 +95,7 @@ export const getProductDetail = async (req, res, next) => {
     const productId = req.params.id;
     const product = await Product.findOne({
       _id: productId,
-      isDeleted: false, // 삭제되지 않은 상품만 조회
+      isDeleted: { $ne: true }, // 삭제되지 않은 상품만 조회
     });
 
     if (!product) {
