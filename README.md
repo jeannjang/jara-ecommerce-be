@@ -7,6 +7,10 @@ The project consists of two repositories:
 - **Frontend** – [View Frontend Repository](https://github.com/jeannjang/jara-ecommerce-fe)
 - **Backend** – This repository
 
+## Quick Preview
+![blur_b](https://github.com/user-attachments/assets/9bf211b0-ebcb-44f5-822f-88522c91071d)
+
+
 ## Backend Overview
 
 This provides `RESTful endpoints` for managing users, products, shopping carts, orders, and reviews. The API is built with `Node.js, Express, and MongoDB`.
