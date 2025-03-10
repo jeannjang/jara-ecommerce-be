@@ -8,8 +8,7 @@ The project consists of two repositories:
 - **Backend** – This repository
 
 ## Quick Preview
-![blur_b](https://github.com/user-attachments/assets/9bf211b0-ebcb-44f5-822f-88522c91071d)
-
+![blur_c](https://github.com/user-attachments/assets/c27f0c97-a4b0-4e4a-b457-f1a445b1c3a5)
 
 ## Backend Overview
 
