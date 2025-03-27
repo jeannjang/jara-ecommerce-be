@@ -20,7 +20,7 @@ This provides `RESTful endpoints` for managing users, products, shopping carts, 
 
 - **User Authentication**: Registration, authentication
 - **Product Management**: CRUD operations with inventory tracking
-- **Shopping Cart**: Add, remove, update products and quantaty
+- **Shopping Cart**: Add, remove, update products and quantity
 - **Order Processing**: Order creation, stock validation
 - **Reviews**: Allow users to create, read, and delete product reviews
 - **Admin Features**: Manage orders and products for authorized administrators
@@ -28,7 +28,7 @@ This provides `RESTful endpoints` for managing users, products, shopping carts, 
 ## Tech Stack
 
 - **Node.js, Express** (JS runtime env, REST API server)
-- **MongoDB, Monggose** (Database, MongoDB object modeling for node.js)
+- **MongoDB, Mongoose** (Database, MongoDB object modeling for Node.js)
 - **JWT, Bcrypt** (Authentication & password encryption)
 - **Google Auth Library** (For Google OAuth integration)
 - **CORS** (To bypass the Same-Origin Policy)
@@ -74,4 +74,4 @@ This provides `RESTful endpoints` for managing users, products, shopping carts, 
 ## Deployment
 
 The backend API is automatically deployed using `Fly.io` with configuration defined in fly.toml. The Docker container is built using the provided `Dockerfile`.  
-When changes are pushed to the main branch, the CI/CD pipeline builds Docker image, pushes the image to the container registry and deploys the updated app to Fly.io.
+When changes are pushed to the main branch, the CI/CD pipeline builds a Docker image, pushes the image to the container registry and deploys the updated app to Fly.io.
